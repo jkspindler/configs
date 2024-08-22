@@ -1,0 +1,31 @@
+! BGP Best Practices Configuration
+hostname BGP_Router
+no ip domain-lookup
+ip domain-name example.com
+!
+! Configure BGP
+router bgp 65000
+ bgp log-neighbor-changes
+ network 192.168.1.0 mask 255.255.255.0
+ neighbor 192.168.2.1 remote-as 65001
+ neighbor 192.168.2.1 description "Neighbor Router"
+ neighbor 192.168.2.1 password MyBGPPassword
+ !
+! Configure route filtering
+ip prefix-list ALLOWED_NETWORKS seq 5 permit 192.168.1.0/24
+route-map FILTER_ROUTES permit 10
+ match ip address prefix-list ALLOWED_NETWORKS
+!
+! Apply route filtering
+ neighbor 192.168.2.1 route-map FILTER_ROUTES in
+!
+! Configure BGP timers
+ timers bgp 30 90
+!
+! Configure logging
+logging buffered 51200
+logging console
+!
+! Save the configuration
+end
+write memory
