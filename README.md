@@ -1,10 +1,10 @@
-Configs Repository </>
+**Configs Repository </>**
 Welcome to the Configs repository! This repository is designed to provide configuration examples for a variety of networking equipment and scenarios. Whether you're setting up a new network, troubleshooting an issue, or just learning, you'll find a range of configuration files here to help you get started.
 
-Overview
+**Overview**
 The Configs repository contains a collection of configuration examples for different networking vendors and technologies. Each configuration is tailored to demonstrate best practices, optimize performance, and enhance security. This repository is a valuable resource for network engineers, administrators, and enthusiasts.
 
-Contents
+**Contents**
 Here’s a snapshot of what you’ll find in this repository:
 
 Cisco: Examples for Cisco devices, including routers and switches.
