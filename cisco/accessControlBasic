@@ -1,0 +1,43 @@
+! Access Control Best Practices Configuration
+hostname AccessSwitch
+no ip domain-lookup
+ip domain-name example.com
+!
+! Configure strong passwords and local user accounts
+username admin privilege 15 secret AdminPassword
+username user privilege 1 secret UserPassword
+!
+! Secure access to the switch
+line con 0
+ password ConsolePassword
+ login
+!
+line vty 0 4
+ password VTYPassword
+ login local
+ transport input ssh
+!
+! Enable SSH and disable Telnet
+ip ssh version 2
+!
+! Configure ACLs for management access
+ip access-list extended Management-ACL
+ permit ip 192.168.1.0 0.0.0.255 any
+ deny ip any any
+!
+! Apply ACLs to VTY lines
+line vty 0 4
+ access-class Management-ACL in
+!
+! Configure port security
+interface range GigabitEthernet0/1 - 24
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security violation restrict
+ switchport port-security aging time 5
+ switchport port-security aging type absolute
+!
+! Save the configuration
+end
+write memory
