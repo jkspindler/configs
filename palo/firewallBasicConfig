@@ -1,0 +1,39 @@
+! Basic Setup for Palo Alto Firewall
+! Configure the management interface and enable access to the GUI
+
+! Set the hostname
+set deviceconfig system hostname PA-Firewall
+
+! Configure the management interface
+set deviceconfig system ip-address 192.168.1.1 netmask 255.255.255.0 default-gateway 192.168.1.254
+
+! Configure DNS settings
+set deviceconfig system dns-setting servers primary 8.8.8.8 secondary 8.8.4.4
+
+! Set the management interface access settings
+set deviceconfig system service-dns yes
+set deviceconfig system service-dhcp yes
+
+! Configure the administrative access settings
+set deviceconfig system service-https yes
+set deviceconfig system service-ssh yes
+
+! Set the administrative user credentials
+set mgt-config users admin password AdminPassword
+
+! Set the time zone
+set deviceconfig system timezone "UTC"
+
+! Configure an interface for data traffic (e.g., Ethernet1/1)
+set network interface ethernet1/1 layer3 ip 10.0.0.1/24
+set network interface ethernet1/1 layer3 interface-management-profile "allow-management"
+
+! Configure a virtual router for routing
+set network virtual-router default
+set network virtual-router default interface ethernet1/1
+
+! Configure a default route
+set network virtual-router default static-route default destination 0.0.0.0/0 nexthop ip-address 10.0.0.254
+
+! Commit the changes to apply the configuration
+commit
