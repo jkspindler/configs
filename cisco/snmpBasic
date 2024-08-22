@@ -1,0 +1,28 @@
+! SNMP Best Practices Configuration
+hostname SNMP_Router
+no ip domain-lookup
+ip domain-name example.com
+!
+! Configure SNMP
+snmp-server community public RO
+snmp-server community private RW
+snmp-server location "Data Center"
+snmp-server contact "Network Admin"
+snmp-server enable traps
+!
+! Configure SNMP views and access control
+snmp-server view MyView iso included
+snmp-server group MyGroup v3 priv read MyView write MyView
+snmp-server user MyUser MyGroup v3 auth md5 MyAuthPassword priv aes 128 MyPrivPassword
+!
+! Configure SNMP traps
+snmp-server enable traps syslog
+snmp-server enable traps linkup linkdown
+!
+! Configure SNMP logging
+logging buffered 51200
+logging console
+!
+! Save the configuration
+end
+write memory
