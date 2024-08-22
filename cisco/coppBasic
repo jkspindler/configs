@@ -1,0 +1,38 @@
+! Best Practice Control Plane Policing Configuration
+hostname Router_CoPP
+no ip domain-lookup
+ip domain-name example.com
+!
+! Define Access Control Lists for Different Types of Traffic
+ip access-list extended CoPP-ACL
+ permit icmp any any
+ permit tcp any any eq ssh
+ permit tcp any any eq telnet
+ permit udp any any eq ntp
+ permit udp any any eq snmp
+ permit udp any any eq syslog
+ deny ip any any
+!
+! Define a Class Map for Control Plane Traffic
+class-map match-any CoPP-Class
+ match access-group name CoPP-ACL
+!
+! Define a Policy Map to Rate Limit Control Plane Traffic
+policy-map CoPP-Policy
+ class CoPP-Class
+  police 1000000 250000 conform-action transmit exceed-action drop
+!
+! Apply the Policy Map to the Control Plane
+control-plane
+ service-policy input CoPP-Policy
+!
+! Verify CoPP Configuration
+show policy-map control-plane
+!
+line vty 0 4
+ login local
+ transport input ssh
+!
+username admin privilege 15 secret AdminPassword
+!
+end
