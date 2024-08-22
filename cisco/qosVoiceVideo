@@ -1,0 +1,54 @@
+! Advanced QoS Configuration for Voice and Video
+hostname QoS_Switch
+no ip domain-lookup
+ip domain-name example.com
+!
+! Define ACLs for different types of traffic
+ip access-list extended VOIP-ACL
+ permit udp any any eq 5060
+ permit udp any any eq 5061
+!
+ip access-list extended VIDEO-ACL
+ permit udp any any eq 1935
+ permit tcp any any eq 443
+!
+! Define class maps for different traffic types
+class-map match-any VOIP-Class
+ match access-group name VOIP-ACL
+!
+class-map match-any VIDEO-Class
+ match access-group name VIDEO-ACL
+!
+class-map match-any Default-Class
+ match any
+!
+! Define policy map with advanced QoS settings
+policy-map QoS-Policy
+ class VOIP-Class
+  priority percent 40
+  set dscp ef
+ class VIDEO-Class
+  bandwidth percent 30
+  set dscp af41
+ class Default-Class
+  fair-queue
+!
+! Apply QoS policy to the interface
+interface GigabitEthernet0/1
+ description Connection to ISP
+ bandwidth 20000
+ service-policy output QoS-Policy
+!
+! Configure bandwidth reservation
+policy-map Bandwidth-Reserve
+ class VOIP-Class
+  bandwidth percent 40
+ class VIDEO-Class
+  bandwidth percent 30
+!
+interface GigabitEthernet0/1
+ service-policy output Bandwidth-Reserve
+!
+! Save the configuration
+end
+write memory
