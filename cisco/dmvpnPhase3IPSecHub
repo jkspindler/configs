@@ -1,0 +1,48 @@
+! DMVPN Phase 3 with IPSec Configuration (Hub)
+hostname Hub_Router
+no ip domain-lookup
+ip domain-name example.com
+!
+interface Tunnel0
+ ip address 10.10.10.1 255.255.255.0
+ tunnel source GigabitEthernet0/0
+ tunnel mode gre multipoint
+ ip nhrp network-id 1
+ ip nhrp nhs 10.10.10.1
+ ip nhrp map multicast dynamic
+ ip nhrp map 10.10.10.2 192.168.1.2
+ ip nhrp map 10.10.10.3 192.168.2.2
+ ip nhrp map 10.10.10.4 192.168.3.2
+ ip nhrp authentication MyNHRPkey
+ ip nhrp authorization MyNHRPkey
+ crypto map DMVPNMAP 10 ipsec-isakmp
+ set peer 192.168.1.2
+ set transform-set DMVPN_TRANSFORM_SET
+ match address DMVPN_ACL
+!
+interface GigabitEthernet0/0
+ ip address 192.168.1.1 255.255.255.0
+ no shutdown
+!
+router eigrp 1
+ network 192.168.1.0 0.0.0.255
+ network 10.10.10.0 0.0.0.255
+!
+crypto isakmp policy 10
+ encr aes
+ authentication pre-share
+ group 2
+!
+crypto isakmp key MyISAKMPkey address 0.0.0.0
+!
+crypto ipsec transform-set DMVPN_TRANSFORM_SET esp-aes esp-sha-hmac
+ mode tunnel
+!
+crypto map DMVPNMAP 10 ipsec-isakmp
+ set peer 192.168.1.2
+ set transform-set DMVPN_TRANSFORM_SET
+ match address DMVPN_ACL
+!
+access-list DMVPN_ACL permit ip 192.168.1.0 0.0.0.255 10.10.10.0 0.0.0.255
+!
+end
