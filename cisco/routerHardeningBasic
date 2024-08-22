@@ -1,0 +1,64 @@
+! Router Hardening Configuration
+hostname Router_Hardened
+no ip domain-lookup
+ip domain-name example.com
+!
+! Set the banner to provide a warning about unauthorized access
+banner motd ^C
+Unauthorized access is prohibited.
+All activities are monitored and logged.
+^C
+!
+! Configure strong passwords and local user accounts
+username admin privilege 15 secret AdminPassword
+username operator privilege 1 secret OperatorPassword
+!
+! Disable unused services
+no ip http server
+no ip http secure-server
+no cdp run
+no lldp run
+!
+! Secure access to the router
+line con 0
+ password ConsolePassword
+ login
+!
+line vty 0 4
+ password VTYPassword
+ login local
+ transport input ssh
+!
+! Enable SSH and disable Telnet
+ip ssh version 2
+!
+! Configure logging
+logging buffered 51200 warnings
+logging console warnings
+!
+! Configure interface security
+interface range GigabitEthernet0/1 - 4
+ shutdown
+!
+! Enable and configure NTP
+ntp server 192.168.1.1
+!
+! Configure access control lists (ACLs)
+ip access-list standard ADMIN-ACL
+ permit 192.168.1.0 0.0.0.255
+!
+! Configure route filtering
+router bgp 65000
+ bgp log-neighbor-changes
+ neighbor 192.168.2.1 remote-as 65001
+ neighbor 192.168.2.1 filter-list 1 in
+!
+! Configure SNMP
+snmp-server community public RO
+snmp-server community private RW
+snmp-server location "Data Center"
+snmp-server contact "Network Admin"
+!
+! Save the configuration
+end
+write memory
