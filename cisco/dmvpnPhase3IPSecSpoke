@@ -1,0 +1,47 @@
+! DMVPN Phase 3 with IPSec Configuration (Spoke)
+hostname Spoke_Router
+no ip domain-lookup
+ip domain-name example.com
+!
+interface Tunnel0
+ ip address 10.10.10.2 255.255.255.0
+ tunnel source GigabitEthernet0/0
+ tunnel destination 192.168.1.1
+ tunnel mode gre multipoint
+ ip nhrp network-id 1
+ ip nhrp nhs 10.10.10.1
+ ip nhrp map multicast 192.168.1.1
+ ip nhrp map 10.10.10.1 192.168.1.1
+ ip nhrp authentication MyNHRPkey
+ ip nhrp authorization MyNHRPkey
+ crypto map DMVPNMAP 10 ipsec-isakmp
+ set peer 192.168.1.1
+ set transform-set DMVPN_TRANSFORM_SET
+ match address DMVPN_ACL
+!
+interface GigabitEthernet0/0
+ ip address 192.168.2.2 255.255.255.0
+ no shutdown
+!
+router eigrp 1
+ network 192.168.2.0 0.0.0.255
+ network 10.10.10.0 0.0.0.255
+!
+crypto isakmp policy 10
+ encr aes
+ authentication pre-share
+ group 2
+!
+crypto isakmp key MyISAKMPkey address 192.168.1.1
+!
+crypto ipsec transform-set DMVPN_TRANSFORM_SET esp-aes esp-sha-hmac
+ mode tunnel
+!
+crypto map DMVPNMAP 10 ipsec-isakmp
+ set peer 192.168.1.1
+ set transform-set DMVPN_TRANSFORM_SET
+ match address DMVPN_ACL
+!
+access-list DMVPN_ACL permit ip 192.168.2.0 0.0.0.255 10.10.10.0 0.0.0.255
+!
+end
