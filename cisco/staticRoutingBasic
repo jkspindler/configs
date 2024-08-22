@@ -1,0 +1,22 @@
+! Static Routing Configuration
+hostname Router4
+no ip domain-lookup
+ip domain-name example.com
+!
+interface GigabitEthernet0/0
+ ip address 192.168.5.1 255.255.255.0
+ no shutdown
+!
+interface GigabitEthernet0/1
+ ip address 10.1.4.1 255.255.255.0
+ no shutdown
+!
+ip route 10.1.4.0 255.255.255.0 192.168.5.254
+!
+line vty 0 4
+ login local
+ transport input ssh
+!
+username admin privilege 15 secret AdminPassword
+!
+end
