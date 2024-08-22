@@ -1,0 +1,82 @@
+! Switch Hardening Configuration
+hostname Switch_Hardened
+no ip domain-lookup
+ip domain-name example.com
+!
+! Set the banner to provide a warning about unauthorized access
+banner motd ^C
+Unauthorized access is prohibited.
+All activities are monitored and logged.
+^C
+!
+! Configure strong passwords for local user accounts
+username admin privilege 15 secret AdminPassword
+username guest privilege 1 secret GuestPassword
+!
+! Disable unused services and interfaces
+no ip http server
+no ip http secure-server
+no cdp run
+no lldp run
+!
+! Secure access to the switch
+line con 0
+ password ConsolePassword
+ login
+!
+line vty 0 4
+ password VTYPassword
+ login local
+ transport input ssh
+!
+! Enable SSH and disable Telnet
+ip ssh version 2
+!
+! Configure logging
+logging buffered 51200 warnings
+logging console warnings
+!
+! Enable port security
+interface range GigabitEthernet0/1 - 24
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security violation restrict
+ switchport port-security aging time 5
+ switchport port-security aging type absolute
+!
+! Disable unused ports
+interface range GigabitEthernet0/1 - 24
+ shutdown
+!
+! Configure spanning-tree protocol
+spanning-tree mode rapid-pvst
+spanning-tree portfast default
+spanning-tree bpduguard enable
+!
+! Configure storm control
+interface range GigabitEthernet0/1 - 24
+ storm-control broadcast level 1.00
+ storm-control multicast level 1.00
+ storm-control action shutdown
+!
+! Enable DHCP snooping and configure trusted ports
+ip dhcp snooping
+ip dhcp snooping vlan 1
+interface GigabitEthernet0/1
+ ip dhcp snooping trust
+!
+! Enable Dynamic ARP Inspection (DAI)
+ip arp inspection vlan 1
+!
+! Configure 802.1X port-based authentication
+dot1x system-auth-control
+interface range GigabitEthernet0/1 - 24
+ dot1x port-control auto
+!
+! Configure NTP for accurate timekeeping
+ntp server 192.168.1.1
+!
+! Save the configuration
+end
+write memory
