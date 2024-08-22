@@ -1,0 +1,23 @@
+! Advanced SNMP Configuration with v3 Security and Notifications
+hostname SNMP_Advanced
+no ip domain-lookup
+ip domain-name example.com
+!
+! Configure SNMP v3 with advanced security
+snmp-server group MyGroup v3 priv read MyView write MyView
+snmp-server user MyUser MyGroup v3 auth sha MyAuthPassword priv aes 256 MyPrivPassword
+!
+! Configure SNMP views and access control
+snmp-server view MyView iso included
+!
+! Configure SNMP notifications
+snmp-server enable traps snmp authentication linkdown linkup
+snmp-server host 192.168.1.10 version 3 priv MyUser
+!
+! Configure SNMP logging
+logging buffered 51200
+logging console
+!
+! Save the configuration
+end
+write memory
