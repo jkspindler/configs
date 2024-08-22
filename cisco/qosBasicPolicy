@@ -1,0 +1,85 @@
+! Modern QoS Policy Configuration
+hostname Router_QoS
+no ip domain-lookup
+ip domain-name example.com
+!
+! Define Access Control Lists for Different Types of Traffic
+ip access-list extended VOIP-ACL
+ permit udp any any eq 5060
+ permit udp any any eq 5061
+!
+ip access-list extended TEAMS-ACL
+ permit udp any any eq 3478
+ permit tcp any any eq 443
+!
+ip access-list extended WEBEX-ACL
+ permit udp any any eq 9000
+ permit tcp any any eq 443
+!
+ip access-list extended WEBAPP-ACL
+ permit tcp any any eq 8080
+!
+ip access-list extended CONTROL-PLANE-ACL
+ permit icmp any any
+ permit tcp any any eq ssh
+ permit tcp any any eq telnet
+ permit udp any any eq ntp
+ permit udp any any eq snmp
+ permit udp any any eq syslog
+ deny ip any any
+!
+! Define Class Maps for Different Traffic Types
+class-map match-any VOIP-Class
+ match access-group name VOIP-ACL
+!
+class-map match-any Teams-Class
+ match access-group name TEAMS-ACL
+!
+class-map match-any Webex-Class
+ match access-group name WEBEX-ACL
+!
+class-map match-any WebApp-Class
+ match access-group name WEBAPP-ACL
+!
+class-map match-any ControlPlane-Class
+ match access-group name CONTROL-PLANE-ACL
+!
+class-map match-any Default-Class
+ match any
+!
+! Define Policy Map for QoS
+policy-map QoS-Policy
+ class VOIP-Class
+  priority percent 30
+  set dscp ef
+ class Teams-Class
+  bandwidth percent 20
+  set dscp cs3
+ class Webex-Class
+  bandwidth percent 15
+  set dscp af41
+ class WebApp-Class
+  bandwidth percent 10
+  set dscp af21
+ class ControlPlane-Class
+  bandwidth percent 5
+  set dscp cs6
+ class Default-Class
+  fair-queue
+!
+! Apply the Policy Map to the Interface
+interface GigabitEthernet0/1
+ description Connection to ISP
+ bandwidth 20000
+ service-policy output QoS-Policy
+!
+! Verify QoS Configuration
+show policy-map interface GigabitEthernet0/1
+!
+line vty 0 4
+ login local
+ transport input ssh
+!
+username admin privilege 15 secret AdminPassword
+!
+end
